@@ -1,11 +1,15 @@
 import time
+import pytest
+from random import  randint
 
 import pendulum
 from fastapi_cache import FastAPICache
 from starlette.testclient import TestClient
 
 from examples.in_memory.main import app
+from fastapi_cache.decorator import cache
 
+pytestmark = pytest.mark.asyncio
 
 def test_datetime():
     with TestClient(app) as client:
@@ -22,6 +26,7 @@ def test_datetime():
         now = pendulum.parse(now).replace(microsecond=0)
         assert now != now_
         assert now == pendulum.now().replace(microsecond=0)
+
 
 def test_date():
     """Test path function without request or response arguments."""
@@ -40,8 +45,18 @@ def test_date():
         assert pendulum.parse(response.json()) == pendulum.today()
         FastAPICache._enable = True
 
+
 def test_sync():
     """Ensure that sync function support works."""
     with TestClient(app) as client:
         response = client.get("/sync-me")
         assert response.json() == 42
+
+
+def test_response_filter():
+    with TestClient(app) as client:
+        response = client.get("/response_filter")
+        r1 = response.json()["randint"]
+        response = client.get("/response_filter")
+        r2 = response.json()["randint"]
+        assert r1 != r2
