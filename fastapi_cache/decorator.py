@@ -15,6 +15,7 @@ def cache(
     coder: Type[Coder] = None,
     key_builder: Callable = None,
     namespace: Optional[str] = "",
+    response_filter: Optional[Callable] = None
 ):
     """
     cache all function
@@ -22,6 +23,7 @@ def cache(
     :param expire:
     :param coder:
     :param key_builder:
+    :param response_filter:
 
     :return:
     """
@@ -105,7 +107,9 @@ def cache(
                 if ret is not None:
                     return coder.decode(ret)
                 ret = await ensure_async_func(*args, **kwargs)
-                await backend.set(cache_key, coder.encode(ret), expire or FastAPICache.get_expire())
+
+                if response_filter is None or response_filter(ret):
+                    await backend.set(cache_key, coder.encode(ret), expire or FastAPICache.get_expire())
                 return ret
 
             if request.method != "GET":
@@ -124,7 +128,8 @@ def cache(
 
             ret = await ensure_async_func(*args, **kwargs)
 
-            await backend.set(cache_key, coder.encode(ret), expire or FastAPICache.get_expire())
+            if response_filter is None or response_filter(ret):
+                await backend.set(cache_key, coder.encode(ret), expire or FastAPICache.get_expire())
             return ret
 
         return inner

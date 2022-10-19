@@ -1,3 +1,5 @@
+from random import randint
+
 import pendulum
 import uvicorn
 from fastapi import FastAPI
@@ -42,12 +44,19 @@ async def get_date():
 async def get_datetime(request: Request, response: Response):
     return {"now": pendulum.now()}
 
+
 @app.get("/sync-me")
 @cache(namespace="test")
 def sync_me():
     # as per the fastapi docs, this sync function is wrapped in a thread,
     # thereby converted to async. fastapi-cache does the same.
     return 42
+
+
+@app.get("/response_filter")
+@cache(response_filter=lambda res: False)
+async def get_randint():
+    return {"randint": randint(1, 1000)}
 
 
 @app.on_event("startup")
