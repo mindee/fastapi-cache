@@ -6,6 +6,9 @@ from typing import Any
 
 import pendulum
 from fastapi.encoders import jsonable_encoder
+from httpx import Response
+
+from fastapi_cache.utils import ResponseWrapper
 
 CONVERTERS = {
     "date": lambda x: pendulum.parse(x, exact=True),
@@ -65,3 +68,13 @@ class PickleCoder(Coder):
     @classmethod
     def decode(cls, value: Any):
         return pickle.loads(value)  # nosec:B403,B301
+
+
+class ResponseCoder(Coder):
+    @classmethod
+    def encode(cls, value: Response) -> str:
+        return ResponseWrapper.from_response(value).dumps()
+
+    @classmethod
+    def decode(cls, value: str) -> ResponseWrapper:
+        return ResponseWrapper.loads(value)
