@@ -2,6 +2,12 @@
 
 **NOTE: we don't aim at maintaining retro-compatibility with the original package, this may contain some breaking changes.**
 
+## v1.0.1 (2022-11-04)
+
+### New
+
+* :sparkles: add ResponseCoder and ResponseWrapper utils
+
 ## v1.0.0
 
 _this is the first version of Mindee's fork of fastapi-cache_ <br/>
